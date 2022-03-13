@@ -47,47 +47,57 @@ runs:
       echo "Cloning destination git repository"
       git config --global user.email "${{ inputs.user_email }}"
       git config --global user.name "${{ inputs.user_name }}"
+    shell: bash
   - id: clone-repo
     run: git clone --single-branch --branch ${{ inputs.destination_branch }} "https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}${{ inputs.destination_repo }}.git" "$CLONE_DIR"
+    shell: bash
     
   - id: rename
-    if: ${{ input.rename != "" }}
     run: |
-      echo "Setting new filename: ${{ input.rename }}"
-      export DEST_COPY="$CLONE_DIR/${{ input.destination_folder }}/${{ input.rename }}"
-    shell: bash
-  - id: rename
-    if: ${{ input.rename == "" }}
-    run: export DEST_COPY="$CLONE_DIR/${{ input.destination_folder }}"
+      if [ ! -z "${{ input.rename }}}" ]
+      then
+        echo "Setting new filename: ${{ input.rename }}"
+        export DEST_COPY="$CLONE_DIR/${{ input.destination_folder }}/${{ input.rename }}"
+      else
+        export DEST_COPY="$CLONE_DIR/${{ input.destination_folder }}"
+      fi
     shell: bash
 
   - id: copy-items
-    if: ${{ input.use_rsync == "" }}
-    run: cp -R "${{ input.source_file }}" "$DEST_COPY"
-  - id: copy-items-rsync
-    if: ${{ input.use_rsync != "" }}
-    run: rsync -avrh "${{ input.source_file }}" "$DEST_COPY"
+    run: |
+      if [ -z "${{ input.use_rsync }}" ]
+      then
+        cp -R "${{ input.source_file }}" "$DEST_COPY"
+      else
+        rsync -avrh "${{ input.source_file }}" "$DEST_COPY"
+      fi
+    shell: bash
 
   - id: cd
     run: cd "$CLONE_DIR"
     shell: bash
 
   - id: create-destination-branch
-    if: ${{ input.destination_branch_create != "" }}
     run: |
-      echo "Creating new branch: ${{ input.destination_branch_create }}"
-      git checkout -b "${{ input.destination_branch_create }}"
-      export OUTPUT_BRANCH="${{ input.destination_branch_create }}"
-  - id: set-output-branch
-    run: export OUTPUT_BRANCH="${{ input.destination_branch }}"
+      if [ ! -z "${{ input.destination_branch_create }}" ]
+      then
+        echo "Creating new branch: ${{ input.destination_branch_create }}"
+        git checkout -b "${{ input.destination_branch_create }}"
+        export OUTPUT_BRANCH="${{ input.destination_branch_create }}"
+      else
+        export OUTPUT_BRANCH="${{ input.destination_branch }}"
+      fi
     shell: bash
 
-  - id: set-commit-message
-    if: ${{ input.commit_message == "" }}
-    run: export COMMIT_MESSAGE="Update from https://${{ input.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-  - id: set-commit-message
-    if: ${{ input.commit_message != "" }}
-    run: export COMMIT_MESSAGE="${{ input.commit_message }}"
+  - id: set-commit-message-default
+    run: |
+      if [ -z "${{ input.commit_message }}" ]
+      then
+        export COMMIT_MESSAGE="Update from https://${{ input.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+      else
+        export COMMIT_MESSAGE="${{ input.commit_message }}"
+      fi
+    shell: bash
 
   - id: commit-and-push
     run: |
@@ -96,6 +106,7 @@ runs:
       git commit --message "$COMMIT_MESSAGE"
       echo "Pushing git commit"
       git push -u origin HEAD:"$OUTPUT_BRANCH"
+    shell: bash
 
 
   - id: cd-back
