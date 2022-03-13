@@ -49,7 +49,7 @@ runs:
       git config --global user.name "${{ inputs.user_name }}"
     shell: bash
   - id: clone-repo
-    run: git clone --single-branch --branch ${{ inputs.destination_branch }} "https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}${{ inputs.destination_repo }}.git" "$CLONE_DIR"
+    run: git clone --single-branch --branch ${{ inputs.destination_branch }} "https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}/${{ inputs.destination_repo }}.git" "$CLONE_DIR"
     shell: bash
     
   - id: rename
