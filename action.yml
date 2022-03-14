@@ -40,7 +40,7 @@ runs:
   steps:
   - id: generate-temp-dir
     run: |
-      export CLONE_DIR="$(mktemp -d)"
+      echo "CLONE_DIR=$(mktemp -d)" >> $GITHUB_ENV
     shell: bash
 
   - id: configure-git
@@ -58,9 +58,9 @@ runs:
       if [ ! -z "${{ inputs.rename }}}" ]
       then
         echo "Setting new filename: ${{ inputs.rename }}"
-        export DEST_COPY="$CLONE_DIR/${{ inputs.destination_folder }}/${{ inputs.rename }}"
+        echo "DEST_COPY=$CLONE_DIR/${{ inputs.destination_folder }}/${{ inputs.rename }}" >> $GITHUB_ENV
       else
-        export DEST_COPY="$CLONE_DIR/${{ inputs.destination_folder }}"
+        echo "DEST_COPY=$CLONE_DIR/${{ inputs.destination_folder }}" >> $GITHUB_ENV
       fi
     shell: bash
 
@@ -84,9 +84,9 @@ runs:
       then
         echo "Creating new branch: ${{ inputs.destination_branch_create }}"
         git checkout -b "${{ inputs.destination_branch_create }}"
-        export OUTPUT_BRANCH="${{ inputs.destination_branch_create }}"
+        echo "OUTPUT_BRANCH=${{ inputs.destination_branch_create }}" >> GITHUB_ENV
       else
-        export OUTPUT_BRANCH="${{ inputs.destination_branch }}"
+        echo "OUTPUT_BRANCH=${{ inputs.destination_branch }}" >> GITHUB_ENV
       fi
     shell: bash
 
@@ -94,9 +94,9 @@ runs:
     run: |
       if [ -z "${{ inputs.commit_message }}" ]
       then
-        export COMMIT_MESSAGE="Update from https://${{ inputs.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+        echo "COMMIT_MESSAGE=Update from https://${{ inputs.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" >> GITHUB_ENV
       else
-        export COMMIT_MESSAGE="${{ inputs.commit_message }}"
+        echo "COMMIT_MESSAGE=${{ inputs.commit_message }}" >> GITHUB_ENV
       fi
     shell: bash
 
