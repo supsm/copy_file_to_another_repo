@@ -111,6 +111,7 @@ runs:
   
   - id: remove-clone-dir
     run: rm -rf "$CLONE_DIR"
+    shell: bash
 
   - id: cd-back
     run: cd -
