@@ -40,7 +40,7 @@ runs:
   steps:
   - id: generate-temp-dir
     run: |
-      export CLONE_DIR="$PWD/copy_file_tmp-$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 10)"
+      export CLONE_DIR="$PWD/copy_file_tmp-$(openssl rand -hex 12)"
     shell: bash
 
   - id: configure-git
