@@ -101,21 +101,19 @@ runs:
       fi
     shell: bash
 
-  - id: commit-and-push
+  - id: commit
     run: |
       git config --global user.email "${{ inputs.user_email }}"
       git config --global user.name "${{ inputs.user_name }}"
-      git config --global user.password "$API_TOKEN_GITHUB"
       echo "Adding git commit"
       git add .
       git commit --message "$COMMIT_MESSAGE"
-      echo "Adding new remote"
-      export GIT_REMOTE_NAME="tmp-$(openssl rand -hex 4)"
-      git remote add $GIT_REMOTE_NAME "$GIT_DEST_URL"
-      echo "Pushing git commit" 
-      git push -u $GIT_REMOTE_NAME HEAD:"$OUTPUT_BRANCH"
-      git remote remove $GIT_REMOTE_NAME
     shell: bash
+  - id: push
+    uses: ad-m/github-push-action@master
+    with: 
+      github_token: $API_TOKEN_GITHUB
+      branch: $OUTPUT_BRANCH
   
   - id: remove-clone-dir
     run: rm -rf "$CLONE_DIR"
