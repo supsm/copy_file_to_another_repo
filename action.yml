@@ -112,8 +112,8 @@ runs:
   - id: push
     uses: ad-m/github-push-action@master
     with: 
-      github_token: $API_TOKEN_GITHUB
-      branch: $OUTPUT_BRANCH
+      github_token: ${{ env.API_TOKEN_GITHUB }}
+      branch: ${{ env.OUTPUT_BRANCH }}
   
   - id: remove-clone-dir
     run: rm -rf "$CLONE_DIR"
