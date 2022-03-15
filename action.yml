@@ -75,7 +75,9 @@ runs:
     shell: bash
 
   - id: cd
-    run: cd "$CLONE_DIR"
+    run: |
+      echo "OLDPWD=$PWD" >> $GITHUB_ENV
+      cd "$CLONE_DIR"
     shell: bash
 
   - id: create-destination-branch
@@ -102,6 +104,7 @@ runs:
 
   - id: commit-and-push
     run: |
+      git pull
       echo "Adding git commit"
       git add .
       git commit --message "$COMMIT_MESSAGE"
