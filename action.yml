@@ -48,9 +48,10 @@ runs:
       echo "Cloning destination git repository"
       git config --global user.email "${{ inputs.user_email }}"
       git config --global user.name "${{ inputs.user_name }}"
+      echo "GIT_DEST_URL=https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}/${{ inputs.destination_repo }}.git" >> $GITHUB_ENV
     shell: bash
   - id: clone-repo
-    run: git clone --single-branch --branch ${{ inputs.destination_branch }} "https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}/${{ inputs.destination_repo }}.git" "$CLONE_DIR"
+    run: git clone --single-branch --branch ${{ inputs.destination_branch }} "$GIT_DEST_URL" "$CLONE_DIR"
     shell: bash
     
   - id: rename
@@ -108,8 +109,12 @@ runs:
       echo "Adding git commit"
       git add .
       git commit --message "$COMMIT_MESSAGE"
-      echo "Pushing git commit"
-      git push -u origin HEAD:"$OUTPUT_BRANCH"
+      echo "Adding new remote"
+      export GIT_REMOTE_NAME="tmp-$(openssl rand -hex 4)"
+      git remote add $GIT_REMOTE_NAME "$GIT_DEST_URL"
+      echo "Pushing git commit" 
+      git push -u $GIT_REMOTE_NAME HEAD:"$OUTPUT_BRANCH"
+      git remote remove $GIT_REMOTE_NAME
     shell: bash
   
   - id: remove-clone-dir
