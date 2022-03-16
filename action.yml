@@ -63,14 +63,13 @@ runs:
       fi
     shell: bash
 
-  - id: cd
-    run: |
-      echo "OLDPWD=$PWD" >> $GITHUB_ENV
-      cd "$CLONE_DIR"
+  - id: save-old-directory
+    run: echo "OLDPWD=$PWD" >> $GITHUB_ENV
     shell: bash
 
   - id: create-destination-branch
     run: |
+      cd "$CLONE_DIR"
       if [ ! -z "${{ inputs.destination_branch_create }}" ]
       then
         echo "Creating new branch: ${{ inputs.destination_branch_create }}"
@@ -84,20 +83,18 @@ runs:
   
   - id: copy-items
     run: |
-      #cd -
-      #if [ -z "${{ inputs.use_rsync }}" ]
-      #then
-      #  cp -R "${{ inputs.source_file }}" "$DEST_COPY"
-      #else
-      #  rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
-      #fi
-      #cd "$CLONE_DIR"
-      echo "$PWD"
-      ls -a -R
+      cd -
+      if [ -z "${{ inputs.use_rsync }}" ]
+      then
+        cp -R "${{ inputs.source_file }}" "$DEST_COPY"
+      else
+        rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
+      fi
     shell: bash
 
   - id: set-commit-message-default
     run: |
+      cd "$CLONE_DIR"
       if [ -z "${{ inputs.commit_message }}" ]
       then
         echo "COMMIT_MESSAGE=Update from https://${{ inputs.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" >> $GITHUB_ENV
@@ -108,6 +105,7 @@ runs:
 
   - id: commit-and-push
     run: |
+      cd "$CLONE_DIR"
       git config --global user.email "${{ inputs.user_email }}"
       git config --global user.name "${{ inputs.user_name }}"
       echo "Adding git commit"
@@ -117,10 +115,10 @@ runs:
       git push "$DEST_URL" -u "$GIT_REMOTE"
     shell: bash
   
-  - id: remove-clone-dir
-    run: rm -rf "$CLONE_DIR"
-    shell: bash
-
   - id: cd-back
     run: cd -
+    shell: bash
+    
+  - id: remove-clone-dir-for-good-measure
+    run: rm -rf "$CLONE_DIR"
     shell: bash
