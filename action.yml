@@ -35,6 +35,10 @@ inputs: # Copied from dmnemec/copy_file_to_another_repo_action
     description: 'Git server host, default github.com'
     required: false
     default: github.com
+  fetch_depth:
+    description: 'Number of commits to fetch, default 1. Set to 0 to fetch all'
+    required: false
+    default: 1
 runs:
   using: "composite"
   steps:
@@ -49,7 +53,7 @@ runs:
   - id: clone-repo
     run: |
       echo "Cloning destination git repository"
-      git clone --single-branch --branch ${{ inputs.destination_branch }} "$GIT_DEST_URL" "$CLONE_DIR"
+      git clone --single-branch --branch ${{ inputs.destination_branch }} --depth="${{ inputs.fetch_depth }}" "$GIT_DEST_URL" "$CLONE_DIR"
     shell: bash
     
   - id: rename
@@ -112,6 +116,7 @@ runs:
       git add .
       git commit --message "$COMMIT_MESSAGE"
       export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
+      git remote add "$GIT_REMOTE"
       git push "$DEST_URL" -u "$GIT_REMOTE"
     shell: bash
   
