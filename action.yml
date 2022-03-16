@@ -116,8 +116,9 @@ runs:
       git add .
       git commit --message "$COMMIT_MESSAGE"
       export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
-      git remote add "$GIT_REMOTE"
+      git remote add "$GIT_REMOTE" "$GIT_DEST_URL"
       git push "$DEST_URL" -u "$GIT_REMOTE"
+      git remote remove "$GIT_REMOTE"
     shell: bash
   
   - id: cd-back
