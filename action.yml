@@ -1,7 +1,10 @@
-name: 'Copy File to Another Branch'
-inputs: # Partially copied from dmnemec/copy_file_to_another_repo_action
+name: 'Copy File to Another Repository'
+inputs: # Copied from dmnemec/copy_file_to_another_repo_action
   source_file:
     description: 'Source file from the origin directory'
+    required: true
+  destination_repo:
+    description: 'Destination repository'
     required: true
   destination_folder:
     description: 'Directory to push the file to'
@@ -28,6 +31,10 @@ inputs: # Partially copied from dmnemec/copy_file_to_another_repo_action
   use_rsync:
     description: 'Copy files/directories using rsync instead of cp. Experimental feature, please know your use case'
     required: false
+  git_server:
+    description: 'Git server host, default github.com'
+    required: false
+    default: github.com
 runs:
   using: "composite"
   steps:
@@ -37,7 +44,7 @@ runs:
     shell: bash
 
   - id: configure-git
-    run: echo "GIT_DEST_URL=https://x-access-token:$API_TOKEN_GITHUB@github.com/$GITHUB_REPOSITORY.git" >> $GITHUB_ENV
+    run: echo "GIT_DEST_URL=https://x-access-token:$API_TOKEN_GITHUB@${{ inputs.git_server }}/${{ inputs.destination_repo }}.git" >> $GITHUB_ENV
     shell: bash
   - id: clone-repo
     run: |
@@ -81,6 +88,7 @@ runs:
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch_create }}" >> $GITHUB_ENV
       else
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch }}" >> $GITHUB_ENV
+        git checkout "${{ inputs.destination_branch }}"
       fi
     shell: bash
 
@@ -88,25 +96,22 @@ runs:
     run: |
       if [ -z "${{ inputs.commit_message }}" ]
       then
-        echo "COMMIT_MESSAGE=Update from https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE=Update from https://${{ inputs.git_server }}/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" >> $GITHUB_ENV
       else
         echo "COMMIT_MESSAGE=${{ inputs.commit_message }}" >> $GITHUB_ENV
       fi
     shell: bash
 
-  - id: commit
+  - id: commit-and-push
     run: |
       git config --global user.email "${{ inputs.user_email }}"
       git config --global user.name "${{ inputs.user_name }}"
       echo "Adding git commit"
       git add .
       git commit --message "$COMMIT_MESSAGE"
+      export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
+      git push "$DEST_URL" -u "$GIT_REMOTE"
     shell: bash
-  - id: push
-    uses: ad-m/github-push-action@master
-    with: 
-      github_token: ${{ env.API_TOKEN_GITHUB }}
-      branch: ${{ env.OUTPUT_BRANCH }}
   
   - id: remove-clone-dir
     run: rm -rf "$CLONE_DIR"
