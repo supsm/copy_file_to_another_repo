@@ -1,4 +1,5 @@
 name: 'Copy File to Another Repository'
+description: 'Copy and push a file to another repository'
 inputs: # Copied from dmnemec/copy_file_to_another_repo_action
   source_file:
     description: 'Source file from the origin directory'
