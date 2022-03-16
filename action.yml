@@ -63,16 +63,6 @@ runs:
       fi
     shell: bash
 
-  - id: copy-items
-    run: |
-      if [ -z "${{ inputs.use_rsync }}" ]
-      then
-        cp -R "${{ inputs.source_file }}" "$DEST_COPY"
-      else
-        rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
-      fi
-    shell: bash
-
   - id: cd
     run: |
       echo "OLDPWD=$PWD" >> $GITHUB_ENV
@@ -88,7 +78,20 @@ runs:
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch_create }}" >> $GITHUB_ENV
       else
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch }}" >> $GITHUB_ENV
+        git checkout "${{ inputs.destination_branch }}"
       fi
+    shell: bash
+  
+  - id: copy-items
+    run: |
+      cd -
+      if [ -z "${{ inputs.use_rsync }}" ]
+      then
+        cp -R "${{ inputs.source_file }}" "$DEST_COPY"
+      else
+        rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
+      fi
+      cd "$CLONE_DIR"
     shell: bash
 
   - id: set-commit-message-default
@@ -107,7 +110,6 @@ runs:
       git config --global user.name "${{ inputs.user_name }}"
       echo "Adding git commit"
       git add .
-      git checkout "$OUTPUT_BRANCH"
       git commit --message "$COMMIT_MESSAGE"
       export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
       git push "$DEST_URL" -u "$GIT_REMOTE"
