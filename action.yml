@@ -88,7 +88,6 @@ runs:
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch_create }}" >> $GITHUB_ENV
       else
         echo "OUTPUT_BRANCH=${{ inputs.destination_branch }}" >> $GITHUB_ENV
-        git checkout "${{ inputs.destination_branch }}"
       fi
     shell: bash
 
@@ -108,6 +107,7 @@ runs:
       git config --global user.name "${{ inputs.user_name }}"
       echo "Adding git commit"
       git add .
+      git checkout "$OUTPUT_BRANCH"
       git commit --message "$COMMIT_MESSAGE"
       export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
       git push "$DEST_URL" -u "$GIT_REMOTE"
