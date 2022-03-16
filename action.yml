@@ -82,17 +82,17 @@ runs:
       fi
     shell: bash
   
-  - id: copy-items
-    run: |
-      cd -
-      if [ -z "${{ inputs.use_rsync }}" ]
-      then
-        cp -R "${{ inputs.source_file }}" "$DEST_COPY"
-      else
-        rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
-      fi
-      cd "$CLONE_DIR"
-    shell: bash
+  #- id: copy-items
+  #  run: |
+  #    cd -
+  #    if [ -z "${{ inputs.use_rsync }}" ]
+  #    then
+  #      cp -R "${{ inputs.source_file }}" "$DEST_COPY"
+  #    else
+  #      rsync -avrh "${{ inputs.source_file }}" "$DEST_COPY"
+  #    fi
+  #    cd "$CLONE_DIR"
+  #  shell: bash
 
   - id: set-commit-message-default
     run: |
