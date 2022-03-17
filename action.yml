@@ -118,11 +118,14 @@ runs:
       git config --global user.name "${{ inputs.user_name }}"
       echo "Adding git commit"
       git add .
-      git commit --message "$COMMIT_MESSAGE"
-      export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
-      git remote add "$GIT_REMOTE" "$GIT_DEST_URL"
-      git push -u "$GIT_REMOTE"
-      git remote remove "$GIT_REMOTE"
+      if [ ! -z "$(git diff --cached)" ]
+      then
+        git commit --message "$COMMIT_MESSAGE"
+        export GIT_REMOTE="tmp-$(openssl rand -hex 8)"
+        git remote add "$GIT_REMOTE" "$GIT_DEST_URL"
+        git push -u "$GIT_REMOTE"
+        git remote remove "$GIT_REMOTE"
+      fi
     shell: bash
   
   - id: cd-back-for-good-measure
