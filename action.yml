@@ -62,12 +62,19 @@ runs:
     
   - id: rename
     run: |
+      if [ -z "${{ inputs.destination_folder }}" ]
+      then
+        export DEST_DIR="$CLONE_DIR"
+      else
+        export DEST_DIR="$CLONE_DIR/${{ inputs.destination_folder }}"
+      fi
+      
       if [ ! -z "${{ inputs.rename }}" ]
       then
         echo "Setting new filename: ${{ inputs.rename }}"
-        echo "DEST_COPY=$CLONE_DIR/${{ inputs.destination_folder }}/${{ inputs.rename }}" >> $GITHUB_ENV
+        echo "DEST_COPY=$DEST_DIR/${{ inputs.rename }}" >> $GITHUB_ENV
       else
-        echo "DEST_COPY=$CLONE_DIR/${{ inputs.destination_folder }}" >> $GITHUB_ENV
+        echo "DEST_COPY=$DEST_DIR/${{ inputs.destination_folder }}" >> $GITHUB_ENV
       fi
     shell: bash
 
