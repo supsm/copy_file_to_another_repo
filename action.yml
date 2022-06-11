@@ -74,7 +74,7 @@ runs:
         echo "Setting new filename: ${{ inputs.rename }}"
         echo "DEST_COPY=$DEST_DIR/${{ inputs.rename }}" >> $GITHUB_ENV
       else
-        echo "DEST_COPY=$DEST_DIR/${{ inputs.destination_folder }}" >> $GITHUB_ENV
+        echo "DEST_COPY=$DEST_DIR" >> $GITHUB_ENV
       fi
     shell: bash
 
